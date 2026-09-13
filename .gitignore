@@ -27,3 +27,9 @@ Thumbs.db
 # Vim swap files
 *.swp
 .*.swp
+
+# Archivos de intercambio de Vim
+*.swp
+.*.swp
+*.swo
+.*.swo
