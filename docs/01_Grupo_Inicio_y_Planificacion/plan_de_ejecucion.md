@@ -5,6 +5,7 @@
 Para garantizar un desarrollo ordenado y medir el esfuerzo técnico, el ciclo de vida del proyecto implementa una metodología ágil adaptada a un contexto individual, combinando el flujo continuo de Kanban con el control métrico de tiempo.
 
 * **Tablero Kanban (ZenHub):** Todo el trabajo se estructura en *Issues* asociadas al repositorio de GitHub. El flujo de estados será estricto para mantener el orden:
+
   * `New Issues`: Bandeja de entrada para ideas, posibles errores o requisitos sin detallar.
   * `To Do`: Tareas desglosadas, estimadas y priorizadas, listas para ser abordadas.
   * `In Progress`: Trabajo en curso. Se aplicará un límite estricto de *Work In Progress* (máximo 1 o 2 tareas simultáneas) para evitar cuellos de botella.
