@@ -1,10 +1,10 @@
-# Metodología de Trabajo y Control de Versiones
+# Plan de Ejecución, Metodología y Control de Versiones
 
-## 1. Gestión del Proyecto (ZenHub y Clockify)
+## 1. Modelo de Gestión Ágil de Tareas (ZenHub y Clockify)
 
-Para garantizar un desarrollo ordenado y medir el esfuerzo técnico, el ciclo de vida del proyecto implementa una metodología ágil adaptada a un contexto individual, combinando el flujo continuo de Kanban con el control métrico de tiempo.
+El ciclo de vida del proyecto implementa una metodología ágil adaptada a un contexto individual, combinando el flujo continuo de Kanban con el control métrico de esfuerzo propio de la ingeniería del software.
 
-* **Tablero Kanban (ZenHub):** Todo el trabajo se estructura en *Issues* asociadas al repositorio de GitHub. El flujo de estados será estricto para mantener el orden:
+* **Tablero Kanban (ZenHub / GitHub Projects):** Todo el trabajo se estructura en *Issues* asociadas al repositorio de GitHub. El flujo de estados será estricto para mantener el orden:
   * `New Issues`: Bandeja de entrada para ideas, posibles errores o requisitos sin detallar.
   * `To Do`: Tareas desglosadas, estimadas y priorizadas, listas para ser abordadas.
   * `In Progress`: Trabajo en curso. Se aplicará un límite estricto de *Work In Progress* (máximo 1 o 2 tareas simultáneas) para evitar cuellos de botella.
@@ -25,7 +25,7 @@ Se utilizará un modelo de ramificación adaptado para un único desarrollador. 
 
 * **`main` (Producción):** Contiene únicamente código estable, funcional y evaluable (versiones de entrega). **Nunca se programa directamente sobre esta rama.** Solo recibe actualizaciones mediante fusiones controladas cuando se alcanza un hito (ej. MVP o Entrega Final).
 * **`develop` (Integración):** Rama base de desarrollo continuo. Actúa como el tronco activo donde convergen todas las funcionalidades terminadas antes de pasar a `main`.
-* **`feature/<nombre-funcionalidad>` (Aislamiento):** Ramas efímeras creadas a partir de `develop` para aislar el desarrollo de tareas específicas (ej. `feature/mapa-leaflet`, `feature/auth-jwt`). Al terminar y verificar el código, se fusionan (*merge*) con `develop` y se eliminan.
+* **`feature/<nombre-funcionalidad>` (Aislamiento):** Ramas efímeras creadas a partir de `develop` para aislar el desarrollo de tareas específicas (ej. `feature/mapa-leaflet`, `docs/acta-constitucion`). Al terminar y verificar el código, se fusionan (*merge*) con `develop` y se eliminan.
 
 ### Diagrama de Flujo del Repositorio
 
@@ -80,7 +80,7 @@ Todos los mensajes de commit seguirán la especificación formal de la industria
 
 * **`feat:`** Nueva funcionalidad o característica. *(Ej: `feat(api): crear endpoint para listar incendios activos`)*
 * **`fix:`** Resolución de un error o bug. *(Ej: `fix(mapa): corregir solapamiento de poligonos`)*
-* **`docs:`** Cambios exclusivos en documentación o archivos Markdown. *(Ej: `docs: actualizar readme con comandos de docker`)*
+* **`docs:`** Cambios exclusivos en documentación o archivos Markdown. *(Ej: `docs(ejecucion): redactar plan de ejecucion`)*
 * **`style:`** Cambios de formato (espacios, comas, indentación) que no afectan a la lógica. *(Ej: `style: formatear componentes con prettier`)*
 * **`refactor:`** Refactorización de código que no arregla un error ni añade funcionalidad (mejora interna). *(Ej: `refactor(db): extraer logica de conexion a un servicio independiente`)*
 * **`test:`** Adición o corrección de pruebas automatizadas. *(Ej: `test: verificar que el JWT caduca en 24h`)*
