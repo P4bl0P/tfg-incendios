@@ -1,10 +1,11 @@
-# Plan de Ejecución, Metodología y Control de Versiones
+# Metodología de Trabajo y Control de Versiones
 
-## 1. Modelo de Gestión Ágil de Tareas (ZenHub y Clockify)
+## 1. Gestión del Proyecto (ZenHub y Clockify)
 
-El ciclo de vida del proyecto implementa una metodología ágil adaptada a un contexto individual, combinando el flujo continuo de Kanban con el control métrico de esfuerzo propio de la ingeniería del software.
+Para garantizar un desarrollo ordenado y medir el esfuerzo técnico, el ciclo de vida del proyecto implementa una metodología ágil adaptada a un contexto individual, combinando el flujo continuo de Kanban con el control métrico de tiempo.
 
-* **Tablero Kanban (ZenHub / GitHub Projects):** Todo el trabajo se estructura en *Issues* asociadas al repositorio de GitHub. El flujo de estados será estricto para mantener el orden:
+* **Tablero Kanban (ZenHub):** Todo el trabajo se estructura en *Issues* asociadas al repositorio de GitHub. El flujo de estados será estricto para mantener el orden:
+
   * `New Issues`: Bandeja de entrada para ideas, posibles errores o requisitos sin detallar.
   * `To Do`: Tareas desglosadas, estimadas y priorizadas, listas para ser abordadas.
   * `In Progress`: Trabajo en curso. Se aplicará un límite estricto de *Work In Progress* (máximo 1 o 2 tareas simultáneas) para evitar cuellos de botella.
@@ -25,7 +26,7 @@ Se utilizará un modelo de ramificación adaptado para un único desarrollador. 
 
 * **`main` (Producción):** Contiene únicamente código estable, funcional y evaluable (versiones de entrega). **Nunca se programa directamente sobre esta rama.** Solo recibe actualizaciones mediante fusiones controladas cuando se alcanza un hito (ej. MVP o Entrega Final).
 * **`develop` (Integración):** Rama base de desarrollo continuo. Actúa como el tronco activo donde convergen todas las funcionalidades terminadas antes de pasar a `main`.
-* **`<tipo>/<nombre-generado-por-github>` (Aislamiento):** Ramas efímeras creadas directamente desde la *Issue* en GitHub. Al crearla, se debe anteponer el prefijo correspondiente (`feature/`, `docs/`, `fix/`, etc.) al nombre que GitHub genera por defecto (ej. `feature/1-auth-jwt`). Al terminar, se fusionan con `develop` mediante un Pull Request (PR) y se eliminan.
+* **`feature/<nombre-funcionalidad>` (Aislamiento):** Ramas efímeras creadas a partir de `develop` para aislar el desarrollo de tareas específicas (ej. `feature/mapa-leaflet`, `feature/auth-jwt`). Al terminar y verificar el código, se fusionan (*merge*) con `develop` y se eliminan.
 
 ### Diagrama de Flujo del Repositorio
 
@@ -35,48 +36,41 @@ gitGraph
     branch develop
     checkout develop
     commit id: "setup: arch base"
-    branch feature/1-mapa-leaflet
-    checkout feature/1-mapa-leaflet
+    branch feature/mapa-leaflet
+    checkout feature/mapa-leaflet
     commit id: "feat: añadir mapa"
     commit id: "fix: corregir tiles"
     checkout develop
-    merge feature/1-mapa-leaflet id: "PR Merge feature"
+    merge feature/mapa-leaflet id: "Merge feature"
     checkout main
     merge develop id: "Release v0.1" tag: "v0.1"
 ```
 
-### Protocolo de Trabajo (Paso a Paso mediante Pull Requests)
+### Protocolo de Trabajo en Consola (Paso a Paso)
 
-Para ilustrar el flujo de trabajo diario, este es el proceso exacto combinando GitHub y la terminal:
+Para ilustrar el flujo de trabajo diario, este es el proceso exacto en terminal para desarrollar una funcionalidad nueva:
 
-**1. Crear y vincular la rama desde la Issue en GitHub:**
-Abre la *Issue* correspondiente a la tarea que vas a desarrollar. En el panel derecho (sección *Development*), haz clic en **"Create a branch"**. Esto vinculará la rama a la *Issue* para que se sincronicen. Modifica el nombre sugerido para añadir el tipo (ej. de `1-auth-jwt` a `feature/1-auth-jwt`) apuntando siempre a `develop`. Luego, descárgala en tu terminal:
+**1. Sincronizar y crear la rama de trabajo:**
 ```bash
-git fetch origin
-git checkout feature/1-auth-jwt
+git checkout develop
+git pull origin develop
+git checkout -b feature/auth-jwt
 ```
 
 **2. Desarrollar, revisar estado y empaquetar cambios:**
-Una vez finalizado el trabajo, añade todos los cambios al área de preparación y crea el commit correspondiente:
 ```bash
 git status
 git add .
 git commit -m "feat(auth): implementar middleware de verificacion JWT"
 ```
 
-**3. Subir la rama y resolver la fusión (Cierre Automático):**
-Sube tus cambios locales al servidor de GitHub:
+**3. Fusionar con develop y limpiar:**
 ```bash
-git push origin feature/1-auth-jwt
-```
-*A partir de este momento, el merge no se hace en la terminal.* Dirígete a la interfaz web de GitHub:
-* Abre un **Pull Request** comparando tu rama recién subida contra `develop`.
-* Revisa los cambios y haz clic en **"Merge pull request"**.
-* Gracias a la vinculación hecha en el paso 1, **GitHub cerrará automáticamente la Issue y la moverá a "Done" en tu tablero Kanban**.
-* Finalmente, actualiza tu `develop`:
-```bash
+git push origin feature/auth-jwt
 git checkout develop
-git pull origin develop
+git merge --no-ff feature/auth-jwt -m "merge: integrar auth-jwt en develop"
+git push origin develop
+git branch -d feature/auth-jwt
 ```
 
 ---
@@ -87,7 +81,7 @@ Todos los mensajes de commit seguirán la especificación formal de la industria
 
 * **`feat:`** Nueva funcionalidad o característica. *(Ej: `feat(api): crear endpoint para listar incendios activos`)*
 * **`fix:`** Resolución de un error o bug. *(Ej: `fix(mapa): corregir solapamiento de poligonos`)*
-* **`docs:`** Cambios exclusivos en documentación o archivos Markdown. *(Ej: `docs(ejecucion): redactar plan de ejecucion`)*
+* **`docs:`** Cambios exclusivos en documentación o archivos Markdown. *(Ej: `docs: actualizar readme con comandos de docker`)*
 * **`style:`** Cambios de formato (espacios, comas, indentación) que no afectan a la lógica. *(Ej: `style: formatear componentes con prettier`)*
 * **`refactor:`** Refactorización de código que no arregla un error ni añade funcionalidad (mejora interna). *(Ej: `refactor(db): extraer logica de conexion a un servicio independiente`)*
 * **`test:`** Adición o corrección de pruebas automatizadas. *(Ej: `test: verificar que el JWT caduca en 24h`)*
