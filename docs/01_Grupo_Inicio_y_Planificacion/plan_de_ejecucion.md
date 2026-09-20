@@ -25,7 +25,7 @@ Se utilizará un modelo de ramificación adaptado para un único desarrollador. 
 
 * **`main` (Producción):** Contiene únicamente código estable, funcional y evaluable (versiones de entrega). **Nunca se programa directamente sobre esta rama.** Solo recibe actualizaciones mediante fusiones controladas cuando se alcanza un hito (ej. MVP o Entrega Final).
 * **`develop` (Integración):** Rama base de desarrollo continuo. Actúa como el tronco activo donde convergen todas las funcionalidades terminadas antes de pasar a `main`.
-* **`feature/<nombre-funcionalidad>` (Aislamiento):** Ramas efímeras creadas a partir de `develop` para aislar el desarrollo de tareas específicas (ej. `feature/mapa-leaflet`, `docs/acta-constitucion`). Al terminar y verificar el código, se fusionan (*merge*) con `develop` y se eliminan.
+* **`<tipo>/<nombre-generado-por-github>` (Aislamiento):** Ramas efímeras creadas directamente desde la *Issue* en GitHub. Al crearla, se debe anteponer el prefijo correspondiente (`feature/`, `docs/`, `fix/`, etc.) al nombre que GitHub genera por defecto (ej. `feature/1-auth-jwt`). Al terminar, se fusionan con `develop` mediante un Pull Request (PR) y se eliminan.
 
 ### Diagrama de Flujo del Repositorio
 
@@ -35,41 +35,48 @@ gitGraph
     branch develop
     checkout develop
     commit id: "setup: arch base"
-    branch feature/mapa-leaflet
-    checkout feature/mapa-leaflet
+    branch feature/1-mapa-leaflet
+    checkout feature/1-mapa-leaflet
     commit id: "feat: añadir mapa"
     commit id: "fix: corregir tiles"
     checkout develop
-    merge feature/mapa-leaflet id: "Merge feature"
+    merge feature/1-mapa-leaflet id: "PR Merge feature"
     checkout main
     merge develop id: "Release v0.1" tag: "v0.1"
 ```
 
-### Protocolo de Trabajo en Consola (Paso a Paso)
+### Protocolo de Trabajo (Paso a Paso mediante Pull Requests)
 
-Para ilustrar el flujo de trabajo diario, este es el proceso exacto en terminal para desarrollar una funcionalidad nueva:
+Para ilustrar el flujo de trabajo diario, este es el proceso exacto combinando GitHub y la terminal:
 
-**1. Sincronizar y crear la rama de trabajo:**
+**1. Crear y vincular la rama desde la Issue en GitHub:**
+Abre la *Issue* correspondiente a la tarea que vas a desarrollar. En el panel derecho (sección *Development*), haz clic en **"Create a branch"**. Esto vinculará la rama a la *Issue* para que se sincronicen. Modifica el nombre sugerido para añadir el tipo (ej. de `1-auth-jwt` a `feature/1-auth-jwt`) apuntando siempre a `develop`. Luego, descárgala en tu terminal:
 ```bash
-git checkout develop
-git pull origin develop
-git checkout -b feature/auth-jwt
+git fetch origin
+git checkout feature/1-auth-jwt
 ```
 
 **2. Desarrollar, revisar estado y empaquetar cambios:**
+Una vez finalizado el trabajo, añade todos los cambios al área de preparación y crea el commit correspondiente:
 ```bash
 git status
 git add .
 git commit -m "feat(auth): implementar middleware de verificacion JWT"
 ```
 
-**3. Fusionar con develop y limpiar:**
+**3. Subir la rama y resolver la fusión (Cierre Automático):**
+Sube tus cambios locales al servidor de GitHub:
 ```bash
-git push origin feature/auth-jwt
+git push origin feature/1-auth-jwt
+```
+*A partir de este momento, el merge no se hace en la terminal.* Dirígete a la interfaz web de GitHub:
+* Abre un **Pull Request** comparando tu rama recién subida contra `develop`.
+* Revisa los cambios y haz clic en **"Merge pull request"**.
+* Gracias a la vinculación hecha en el paso 1, **GitHub cerrará automáticamente la Issue y la moverá a "Done" en tu tablero Kanban**.
+* Finalmente, actualiza tu `develop`:
+```bash
 git checkout develop
-git merge --no-ff feature/auth-jwt -m "merge: integrar auth-jwt en develop"
-git push origin develop
-git branch -d feature/auth-jwt
+git pull origin develop
 ```
 
 ---
