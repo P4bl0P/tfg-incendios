@@ -31,5 +31,22 @@ La gestión de este Trabajo Fin de Grado se estructura de manera sistemática si
 * **Documentación Final:** Elaboración del Manual de Usuario y de la Memoria final del TFG.
 * **Salidas generadas:** Acta de Cierre, Manual de Usuario, Memoria del TFG.
 
+## 6. Estructura de Desglose del Trabajo (EDT)
+Para facilitar la asignación y seguimiento, el proyecto se divide en los siguientes paquetes de trabajo principales:
+* **PT1. Gestión y Planificación:** Actas, planes de proyecto, ejecución y seguimiento.
+* **PT2. Especificación y Diseño:** Historias de usuario, bocetos UI, diseño E-R y diagramas de componentes.
+* **PT3. Infraestructura y Datos:** Contenedores Docker, configuración PostGIS y scripts de ingesta externa (NASA FIRMS).
+* **PT4. Desarrollo Backend:** Autenticación RBAC, API REST, WebSockets.
+* **PT5. Desarrollo Frontend:** PWA, renderizado cartográfico (Leaflet), panel de gestión.
+* **PT6. Calidad y Cierre:** QA, casos de prueba, actas de reuniones y memoria final del TFG.
+
+## 7. Gestión de Riesgos
+* **Riesgo 1 (Tecnológico):** Inestabilidad o cambios en la API pública de NASA FIRMS. 
+  * *Mitigación:* Implementar un sistema de control de errores y un *mock* de datos locales para el entorno de desarrollo.
+* **Riesgo 2 (Planificación):** Retrasos en el desarrollo debido al límite estricto del WIP (Work In Progress).
+  * *Mitigación:* Metodología para corrección de desviaciones mediante la reasignación de horas del Grupo de Seguimiento hacia el de Ejecución.
+* **Riesgo 3 (Rendimiento):** Latencia excesiva en consultas geoespaciales complejas.
+  * *Mitigación:* Uso de índices espaciales (GiST) en PostGIS desde el inicio de la fase de construcción.
+  
 ---
 **Total Estimado:** 300 Horas.
