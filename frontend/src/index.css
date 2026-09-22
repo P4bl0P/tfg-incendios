@@ -5,3 +5,9 @@
 body {
   @apply bg-slate-100 text-slate-900;
 }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
