@@ -8,7 +8,9 @@ import {
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import * as L from 'leaflet';
 
+
 import LayerToggle from './LayerToggle';
+import GeolocationControl from './GeolocationControl';
 
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
@@ -147,8 +149,8 @@ export default function Map() {
       <MapContainer
         center={[39.5, -3.0]}
         zoom={6}
-        style={{ height: '100vh', width: '100vw' }}
-        className="z-0"
+        style={{ height: '100%', width: '100%' }}
+        className="relative z-0 h-screen w-full"
       >
         {layerType === 'dark' ? (
           <TileLayer
@@ -163,6 +165,8 @@ export default function Map() {
             attribution="Tiles © Esri"
           />
         )}
+
+        <GeolocationControl />
 
         <MarkerClusterGroup
           chunkedLoading

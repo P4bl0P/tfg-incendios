@@ -15,8 +15,8 @@
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  width: 150px;
-  height: 35px;
+  width: 160px;
+  height: 40px;
   padding: 4px;
   overflow: hidden;
   isolation: isolate;
