@@ -10,6 +10,8 @@ import * as L from 'leaflet';
 import MapControlButton from './MapControlButton';
 import useGeolocation from './useGeolocation';
 
+const MAX_VISIBLE_ACCURACY = 1000;
+
 const userLocationIcon = L.divIcon({
   className: '',
   iconSize: [42, 42],
@@ -45,8 +47,8 @@ const userLocationIcon = L.divIcon({
         border-radius: 9999px;
         background: #2563eb;
         box-shadow:
-          0 0 0 3px rgba(37,99,235,0.45),
-          0 4px 12px rgba(15,23,42,0.4);
+          0 0 0 3px rgba(37, 99, 235, 0.45),
+          0 4px 12px rgba(15, 23, 42, 0.4);
       ">
         <span style="
           width: 5px;
@@ -133,6 +135,7 @@ export default function MapControls() {
     accuracy,
     status,
     errorMessage,
+    isCentering,
     locateUser,
   } = useGeolocation();
 
@@ -155,6 +158,12 @@ export default function MapControls() {
 
   const canZoomOut =
     zoom > map.getMinZoom();
+
+  const shouldShowAccuracyCircle =
+    position !== null &&
+    accuracy !== null &&
+    accuracy <= MAX_VISIBLE_ACCURACY &&
+    !isCentering;
 
   return (
     <>
@@ -247,7 +256,11 @@ export default function MapControls() {
           "
         >
           <div className="mb-1 flex items-center gap-2 font-semibold">
-            <span className="h-2 w-2 rounded-full bg-red-400" />
+            <span
+              className="h-2 w-2 rounded-full bg-red-400"
+              aria-hidden="true"
+            />
+
             No se pudo obtener la ubicación
           </div>
 
@@ -259,14 +272,14 @@ export default function MapControls() {
 
       {position && (
         <>
-          {accuracy !== null && (
+          {shouldShowAccuracyCircle && (
             <Circle
               center={position}
               radius={accuracy}
               pathOptions={{
                 color: '#60a5fa',
                 fillColor: '#3b82f6',
-                fillOpacity: 0.12,
+                fillOpacity: 0.08,
                 weight: 1.5,
               }}
             />
@@ -298,6 +311,14 @@ export default function MapControls() {
                     aproximadamente {Math.round(accuracy)} m
                   </p>
                 )}
+
+                {accuracy !== null &&
+                  accuracy > MAX_VISIBLE_ACCURACY && (
+                    <p className="mt-2 text-xs text-amber-600">
+                      La precisión actual es baja, por eso no se muestra
+                      el área de precisión en el mapa.
+                    </p>
+                  )}
               </div>
             </Popup>
           </Marker>

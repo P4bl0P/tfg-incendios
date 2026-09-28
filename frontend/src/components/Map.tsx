@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import {
-  MapContainer,
-} from 'react-leaflet';
+import { MapContainer } from 'react-leaflet';
 
 import LayerToggle from './LayerToggle';
 import BaseMapLayer, {
@@ -16,7 +14,7 @@ import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
 
 export default function Map() {
   const [layerType, setLayerType] =
-    useState<LayerType>('dark');
+    useState<LayerType>('street');
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
@@ -28,7 +26,13 @@ export default function Map() {
       <MapContainer
         center={[39.5, -3.0]}
         zoom={6}
+        minZoom={4}
         zoomControl={false}
+        maxBounds={[
+          [-85, -180],
+          [85, 180],
+        ]}
+        maxBoundsViscosity={1}
         style={{
           height: '100%',
           width: '100%',

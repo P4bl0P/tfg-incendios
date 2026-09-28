@@ -42,6 +42,9 @@ export default function useGeolocation() {
   const [errorMessage, setErrorMessage] =
     useState<string | null>(null);
 
+  const [isCentering, setIsCentering] =
+    useState(false);
+
   const locateUser = useCallback(() => {
     if (!navigator.geolocation) {
       setStatus('error');
@@ -64,6 +67,14 @@ export default function useGeolocation() {
         setPosition(nextPosition);
         setAccuracy(coords.accuracy);
         setStatus('success');
+        setIsCentering(true);
+
+        const handleMoveEnd = () => {
+          setIsCentering(false);
+          map.off('moveend', handleMoveEnd);
+        };
+
+        map.on('moveend', handleMoveEnd);
 
         map.flyTo(
           nextPosition,
@@ -76,6 +87,7 @@ export default function useGeolocation() {
       },
       (error) => {
         setStatus('error');
+        setIsCentering(false);
         setErrorMessage(
           getLocationErrorMessage(error),
         );
@@ -93,6 +105,7 @@ export default function useGeolocation() {
     accuracy,
     status,
     errorMessage,
+    isCentering,
     locateUser,
   };
 }
