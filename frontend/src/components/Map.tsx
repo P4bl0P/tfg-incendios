@@ -7,6 +7,7 @@ import BaseMapLayer, {
 } from './BaseMapLayer';
 import MapControls from './map-controls/MapControls';
 import FireLayer from './fires/FireLayer';
+import WeatherLayer from './weather/WeatherLayer';
 
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
@@ -15,6 +16,9 @@ import 'react-leaflet-cluster/dist/assets/MarkerCluster.Default.css';
 export default function Map() {
   const [layerType, setLayerType] =
     useState<LayerType>('street');
+
+  const [weatherEnabled, setWeatherEnabled] =
+    useState(false);
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
@@ -41,9 +45,14 @@ export default function Map() {
       >
         <BaseMapLayer layerType={layerType} />
 
-        <MapControls />
+        <MapControls
+          weatherEnabled={weatherEnabled}
+          setWeatherEnabled={setWeatherEnabled}
+        />
 
         <FireLayer />
+
+        <WeatherLayer enabled={weatherEnabled} />
       </MapContainer>
     </div>
   );
