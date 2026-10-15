@@ -29,3 +29,28 @@ body {
     transform: scale(1.45);
   }
 }
+
+@keyframes wind-arrow-flow {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: translateX(-1.5px);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(2.5px);
+  }
+}
+
+.wind-arrow-flow {
+  animation: wind-arrow-flow 3.2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wind-arrow-flow {
+    animation: none;
+    opacity: 0.9;
+  }
+}

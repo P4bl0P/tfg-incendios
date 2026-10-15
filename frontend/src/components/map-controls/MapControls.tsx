@@ -12,6 +12,11 @@ import useGeolocation from './useGeolocation';
 
 const MAX_VISIBLE_ACCURACY = 1000;
 
+interface MapControlsProps {
+  weatherEnabled: boolean;
+  setWeatherEnabled: (enabled: boolean) => void;
+}
+
 const userLocationIcon = L.divIcon({
   className: '',
   iconSize: [42, 42],
@@ -115,6 +120,25 @@ function LocationIcon() {
   );
 }
 
+function WindIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="h-[18px] w-[18px]"
+    >
+      <path d="M3 8h11a3 3 0 1 0-3-3" />
+      <path d="M3 12h15a3 3 0 1 1-3 3" />
+      <path d="M3 16h8a3 3 0 1 0-3 3" />
+    </svg>
+  );
+}
+
 function LoadingIcon() {
   return (
     <span
@@ -127,7 +151,10 @@ function LoadingIcon() {
   );
 }
 
-export default function MapControls() {
+export default function MapControls({
+  weatherEnabled,
+  setWeatherEnabled,
+}: MapControlsProps) {
   const map = useMap();
 
   const {
@@ -237,6 +264,56 @@ export default function MapControls() {
               : status === 'success'
                 ? 'Volver a mi ubicación'
                 : 'Centrar en mi ubicación'}
+          </span>
+        </div>
+
+        <div className="group relative pointer-events-auto">
+          <MapControlButton
+            aria-label={
+              weatherEnabled
+                ? 'Desactivar meteorología'
+                : 'Activar meteorología'
+            }
+            title={
+              weatherEnabled
+                ? 'Desactivar meteorología'
+                : 'Activar meteorología'
+            }
+            aria-pressed={weatherEnabled}
+            active={weatherEnabled}
+            onClick={() =>
+              setWeatherEnabled(!weatherEnabled)
+            }
+          >
+            <WindIcon />
+
+            {weatherEnabled && (
+              <span
+                aria-hidden="true"
+                className="
+                  absolute right-0.5 top-0.5 z-20
+                  h-2 w-2 rounded-full
+                  border border-white bg-cyan-500
+                "
+              />
+            )}
+          </MapControlButton>
+
+          <span
+            className="
+              pointer-events-none absolute left-[calc(100%+10px)]
+              top-1/2 z-[1000] hidden -translate-y-1/2
+              whitespace-nowrap rounded-xl
+              border border-white/10 bg-slate-950/90
+              px-3 py-2 text-xs font-medium text-white
+              opacity-0 shadow-xl backdrop-blur-xl
+              transition-all duration-200
+              group-hover:block group-hover:opacity-100
+            "
+          >
+            {weatherEnabled
+              ? 'Ocultar meteorología'
+              : 'Mostrar meteorología'}
           </span>
         </div>
       </div>

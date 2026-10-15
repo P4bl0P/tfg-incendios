@@ -1,8 +1,14 @@
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import * as L from 'leaflet';
 
-import useFires from './useFires';
 import FireMarker from './FireMarker';
+import type { FireFeature } from './fireTypes';
+
+interface FireLayerProps {
+  features: FireFeature[];
+  loading: boolean;
+  error: string | null;
+}
 
 function createClusterIcon(count: number) {
   let size = 30;
@@ -54,15 +60,11 @@ function createClusterIcon(count: number) {
   });
 }
 
-export default function FireLayer() {
-  const {
-    incendios,
-    loading,
-    error,
-  } = useFires();
-
-  const features = incendios?.features ?? [];
-
+export default function FireLayer({
+  features,
+  loading,
+  error,
+}: FireLayerProps) {
   if (loading) {
     return null;
   }

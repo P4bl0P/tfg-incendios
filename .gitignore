@@ -33,3 +33,8 @@ Thumbs.db
 .*.swp
 *.swo
 .*.swo
+
+# Builds generados
+dist/
+frontend/dist/
+backend/dist/
