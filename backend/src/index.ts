@@ -63,13 +63,17 @@ app.get(
     res: Response,
   ) => {
     try {
-      const points =
-        await getWindGrid();
+      const forceRefresh =
+        req.query.refresh === '1' ||
+        req.query.refresh === 'true';
+
+      const points = await getWindGrid(
+        forceRefresh,
+      );
 
       const response: WindGridResponse = {
         points,
-        updatedAt:
-          new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       res.json(response);

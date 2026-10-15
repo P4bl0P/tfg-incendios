@@ -61,7 +61,9 @@ export default function useWindGrid({
     useState(0);
 
   const refresh = useCallback(() => {
-    setRefreshToken((value) => value + 1);
+    setRefreshToken(
+      (value) => value + 1,
+    );
   }, []);
 
   useEffect(() => {
@@ -73,15 +75,30 @@ export default function useWindGrid({
       return;
     }
 
-    const controller = new AbortController();
+    const controller =
+      new AbortController();
+
+    const isForcedRefresh =
+      refreshToken > 0;
 
     async function loadWindGrid() {
       setLoading(true);
       setError(null);
 
       try {
-        const response = await fetch(
+        const url = new URL(
           WIND_GRID_URL,
+        );
+
+        if (isForcedRefresh) {
+          url.searchParams.set(
+            'refresh',
+            '1',
+          );
+        }
+
+        const response = await fetch(
+          url,
           {
             signal: controller.signal,
           },
@@ -132,10 +149,57 @@ export default function useWindGrid({
 
     loadWindGrid();
 
-    const intervalId = window.setInterval(
-      loadWindGrid,
-      REFRESH_INTERVAL_MS,
-    );
+    const intervalId =
+      window.setInterval(
+        () => {
+          const intervalController =
+            new AbortController();
+
+          fetch(WIND_GRID_URL, {
+            signal: intervalController.signal,
+          })
+            .then(async (response) => {
+              if (!response.ok) {
+                throw new Error(
+                  `Error HTTP: ${response.status}`,
+                );
+              }
+
+              const body: unknown =
+                await response.json();
+
+              if (!isWindGridResponse(body)) {
+                throw new Error(
+                  'La respuesta de viento no tiene un formato válido.',
+                );
+              }
+
+              setPoints(body.points);
+              setLastUpdated(
+                new Date(body.updatedAt),
+              );
+              setError(null);
+            })
+            .catch((intervalError: unknown) => {
+              if (
+                intervalError instanceof DOMException &&
+                intervalError.name === 'AbortError'
+              ) {
+                return;
+              }
+
+              console.error(
+                'Error actualizando la rejilla de viento:',
+                intervalError,
+              );
+
+              setError(
+                'No se ha podido actualizar la capa de viento.',
+              );
+            });
+        },
+        REFRESH_INTERVAL_MS,
+      );
 
     return () => {
       controller.abort();

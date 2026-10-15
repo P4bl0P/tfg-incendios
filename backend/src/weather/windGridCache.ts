@@ -16,10 +16,11 @@ const CACHE_DURATION_MS =
 
 let cache: WindGridCache | null = null;
 
-export async function getWindGrid(): Promise<
-  WindGridPoint[]
-> {
+export async function getWindGrid(
+  forceRefresh = false,
+): Promise<WindGridPoint[]> {
   if (
+    !forceRefresh &&
     cache &&
     Date.now() < cache.expiresAt
   ) {
