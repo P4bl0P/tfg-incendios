@@ -1,13 +1,14 @@
-export interface WeatherData {
+export interface WindGridPoint {
   latitude: number;
   longitude: number;
-  temperature: number;
-  feelsLike: number | null;
-  humidity: number | null;
+  temperature: number | null;
   windSpeed: number | null;
   windDirection: number | null;
-  windGust: number | null;
-  weatherDescription: string | null;
-  weatherIcon: string | null;
+  windGusts: number | null;
   observedAt: string;
+}
+
+export interface WindGridResponse {
+  points: WindGridPoint[];
+  updatedAt: string;
 }

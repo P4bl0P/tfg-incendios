@@ -7,7 +7,8 @@ import BaseMapLayer, {
 } from './BaseMapLayer';
 import MapControls from './map-controls/MapControls';
 import FireLayer from './fires/FireLayer';
-import WeatherLayer from './weather/WeatherLayer';
+import useFires from './fires/useFires';
+import WindGridLayer from './weather/WindGridLayer';
 
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
@@ -19,6 +20,15 @@ export default function Map() {
 
   const [weatherEnabled, setWeatherEnabled] =
     useState(false);
+
+  const {
+    incendios,
+    loading: firesLoading,
+    error: firesError,
+  } = useFires();
+
+  const features =
+    incendios?.features ?? [];
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
@@ -45,15 +55,36 @@ export default function Map() {
       >
         <BaseMapLayer layerType={layerType} />
 
+        <WindGridLayer
+          enabled={weatherEnabled}
+        />
+
         <MapControls
           weatherEnabled={weatherEnabled}
           setWeatherEnabled={setWeatherEnabled}
         />
 
-        <FireLayer />
-
-        <WeatherLayer enabled={weatherEnabled} />
+        <FireLayer
+          features={features}
+          loading={firesLoading}
+          error={firesError}
+        />
       </MapContainer>
+
+      <div
+        className="
+          pointer-events-none absolute bottom-2
+          right-2 z-[1000]
+          rounded-lg bg-white/80
+          px-2 py-1 text-[10px]
+          text-slate-600 backdrop-blur-sm
+        "
+      >
+        Datos meteorológicos:
+        <span className="font-semibold">
+          {' '}Open-Meteo.com
+        </span>
+      </div>
     </div>
   );
 }
