@@ -8,6 +8,7 @@ interface FireLayerProps {
   features: FireFeature[];
   loading: boolean;
   error: string | null;
+  onSelect: (feature: FireFeature) => void;
 }
 
 function createClusterIcon(count: number) {
@@ -64,6 +65,7 @@ export default function FireLayer({
   features,
   loading,
   error,
+  onSelect,
 }: FireLayerProps) {
   if (loading) {
     return null;
@@ -98,6 +100,7 @@ export default function FireLayer({
           key={`${feature.geometry.coordinates.join('-')}-${index}`}
           feature={feature}
           index={index}
+          onSelect={onSelect}
         />
       ))}
     </MarkerClusterGroup>
