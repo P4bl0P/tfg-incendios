@@ -47,6 +47,9 @@ Para facilitar la asignación y seguimiento, el proyecto se divide en los siguie
   * *Mitigación:* Metodología para corrección de desviaciones mediante la reasignación de horas del Grupo de Seguimiento hacia el de Ejecución.
 * **Riesgo 3 (Rendimiento):** Latencia excesiva en consultas geoespaciales complejas.
   * *Mitigación:* Uso de índices espaciales (GiST) en PostGIS desde el inicio de la fase de construcción.
-  
+* **Riesgo 4 (Dependencias Externas):** Superar los límites de peticiones gratuitas (*Rate Limit*) en las APIs meteorológicas y de geocodificación al escalar usuarios.
+  * *Mitigación:* Implementar una caché en el backend (ej. Redis) para no consultar la API externa si los datos meteorológicos de esa región tienen menos de 1 hora de antigüedad.
+* **Riesgo 5 (Compatibilidad PWA):** Restricciones en navegadores iOS para la recepción de Web Push Notifications en segundo plano.
+  * *Mitigación:* Limitar la garantía de recepción nativa a navegadores compatibles (Chrome/Edge/Android) y mostrar alertas in-app (*toasts*) cuando el usuario tenga la aplicación abierta.
 ---
 **Total Estimado:** 300 Horas.
