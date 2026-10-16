@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MapContainer } from 'react-leaflet';
 
 import LayerToggle from './LayerToggle';
@@ -7,8 +7,12 @@ import BaseMapLayer, {
 } from './BaseMapLayer';
 import MapControls from './map-controls/MapControls';
 import FireLayer from './fires/FireLayer';
+import FireDetailsSidebar from './fires/FireDetailsSidebar';
 import useFires from './fires/useFires';
+import useReverseGeocoding from './fires/useReverseGeocoding';
 import WindGridLayer from './weather/WindGridLayer';
+
+import type { FireFeature } from './fires/fireTypes';
 
 import 'leaflet/dist/leaflet.css';
 import 'react-leaflet-cluster/dist/assets/MarkerCluster.css';
@@ -21,14 +25,45 @@ export default function Map() {
   const [weatherEnabled, setWeatherEnabled] =
     useState(false);
 
+  const [selectedFire, setSelectedFire] =
+    useState<FireFeature | null>(null);
+
   const {
     incendios,
     loading: firesLoading,
     error: firesError,
   } = useFires();
 
-  const features =
-    incendios?.features ?? [];
+  const features = incendios?.features ?? [];
+
+  const selectedCoordinates =
+    selectedFire?.geometry.coordinates ?? null;
+
+  const {
+    location,
+    loading: locationLoading,
+    error: locationError,
+  } = useReverseGeocoding(selectedCoordinates);
+
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedFire(null);
+      }
+    };
+
+    document.addEventListener(
+      'keydown',
+      handleEscape,
+    );
+
+    return () => {
+      document.removeEventListener(
+        'keydown',
+        handleEscape,
+      );
+    };
+  }, []);
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
@@ -55,9 +90,7 @@ export default function Map() {
       >
         <BaseMapLayer layerType={layerType} />
 
-        <WindGridLayer
-          enabled={weatherEnabled}
-        />
+        <WindGridLayer enabled={weatherEnabled} />
 
         <MapControls
           weatherEnabled={weatherEnabled}
@@ -68,23 +101,20 @@ export default function Map() {
           features={features}
           loading={firesLoading}
           error={firesError}
+          onSelect={setSelectedFire}
         />
       </MapContainer>
 
-      <div
-        className="
-          pointer-events-none absolute bottom-2
-          right-2 z-[1000]
-          rounded-lg bg-white/80
-          px-2 py-1 text-[10px]
-          text-slate-600 backdrop-blur-sm
-        "
-      >
-        Datos meteorológicos:
-        <span className="font-semibold">
-          {' '}Open-Meteo.com
-        </span>
-      </div>
+      {selectedFire && (
+        <FireDetailsSidebar
+          feature={selectedFire}
+          location={location}
+          locationLoading={locationLoading}
+          locationError={locationError}
+          onClose={() => setSelectedFire(null)}
+        />
+      )}
+      
     </div>
   );
 }

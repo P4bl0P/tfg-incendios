@@ -22,7 +22,7 @@ app.get('/api/health', (req: Request, res: Response) => {
 
 app.get(
   '/api/incendios',
-  async (req: Request, res: Response) => {
+  async (_req: Request, res: Response) => {
     try {
       const query = `
         SELECT json_build_object(
@@ -36,6 +36,7 @@ app.get(
           SELECT
             id,
             estado,
+            origen,
             intensidad_frp,
             fecha_deteccion,
             geom
@@ -48,6 +49,7 @@ app.get(
       res.json(rows[0].geojson);
     } catch (error) {
       console.error('Error al consultar PostGIS:', error);
+
       res.status(500).json({
         error: 'Error interno del servidor',
       });
@@ -86,6 +88,83 @@ app.get(
       res.status(502).json({
         error:
           'No se ha podido obtener la rejilla meteorológica.',
+      });
+    }
+  },
+);
+
+app.get(
+  '/api/geocodificacion-inversa',
+  async (req: Request, res: Response) => {
+    const lat = Number(req.query.lat);
+    const lon = Number(req.query.lon);
+
+    if (
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lon) ||
+      lat < -90 ||
+      lat > 90 ||
+      lon < -180 ||
+      lon > 180
+    ) {
+      res.status(400).json({
+        error: 'Las coordenadas no son válidas.',
+      });
+
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=jsonv2&zoom=10&addressdetails=1`,
+        {
+          headers: {
+            Accept: 'application/json',
+            'User-Agent': 'tfg-incendios/1.0',
+          },
+        },
+      );
+
+      if (!response.ok) {
+        res.status(502).json({
+          error: 'No se ha podido obtener la ubicación.',
+        });
+
+        return;
+      }
+
+      const data = await response.json();
+
+      const address = data.address ?? {};
+
+      res.json({
+        municipio:
+          address.city ??
+          address.town ??
+          address.village ??
+          address.municipality ??
+          null,
+
+        provincia:
+          address.province ??
+          address.state ??
+          null,
+
+        comunidad:
+          address.region ??
+          address.state_district ??
+          null,
+
+        displayName: data.display_name ?? null,
+      });
+    } catch (error) {
+      console.error(
+        'Error en la geocodificación inversa:',
+        error,
+      );
+
+      res.status(502).json({
+        error: 'No se ha podido geocodificar la ubicación.',
       });
     }
   },
