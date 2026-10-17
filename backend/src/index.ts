@@ -170,6 +170,104 @@ app.get(
   },
 );
 
+app.get(
+  '/api/evacuacion',
+  async (req: Request, res: Response) => {
+    const municipio =
+      typeof req.query.municipio === 'string'
+        ? req.query.municipio
+        : null;
+
+    try {
+      const query = `
+        SELECT json_build_object(
+          'routes',
+          COALESCE(
+            (
+              SELECT json_agg(route)
+              FROM (
+                SELECT json_build_object(
+                  'type', 'Feature',
+                  'geometry', ST_AsGeoJSON(geom)::json,
+                  'properties', json_build_object(
+                    'id', id,
+                    'nombre', nombre,
+                    'color', color,
+                    'municipio', municipio,
+                    'provincia', provincia,
+                    'tipoEmergencia', tipo_emergencia,
+                    'estado', estado,
+                    'fuente', fuente,
+                    'organismo', organismo,
+                    'fiabilidad', fiabilidad,
+                    'fechaVerificacion', fecha_verificacion,
+                    'urlFuente', url_fuente,
+                    'observaciones', observaciones
+                  )
+                ) AS route
+                FROM rutas_evacuacion
+                WHERE (
+                  $1::text IS NULL
+                  OR municipio = $1
+                )
+              ) AS routes
+            ),
+            '[]'::json
+          ),
+          'meetingPoints',
+          COALESCE(
+            (
+              SELECT json_agg(point)
+              FROM (
+                SELECT json_build_object(
+                  'type', 'Feature',
+                  'geometry', ST_AsGeoJSON(geom)::json,
+                  'properties', json_build_object(
+                    'id', id,
+                    'nombre', nombre,
+                    'capacidad', capacidad,
+                    'tipoPunto', tipo_punto,
+                    'municipio', municipio,
+                    'provincia', provincia,
+                    'fuente', fuente,
+                    'organismo', organismo,
+                    'fiabilidad', fiabilidad,
+                    'fechaVerificacion', fecha_verificacion,
+                    'urlFuente', url_fuente,
+                    'observaciones', observaciones
+                  )
+                ) AS point
+                FROM puntos_encuentro
+                WHERE (
+                  $1::text IS NULL
+                  OR municipio = $1
+                )
+              ) AS meeting_points
+            ),
+            '[]'::json
+          )
+        ) AS evacuation;
+      `;
+
+      const { rows } = await pool.query(query, [
+        municipio,
+      ]);
+
+      res.json(rows[0].evacuation);
+    } catch (error) {
+      console.error(
+        'Error consultando la información de evacuación:',
+        error,
+      );
+
+      res.status(500).json({
+        error:
+          'No se ha podido cargar la información de evacuación.',
+      });
+    }
+  },
+);
+
 
 app.listen(PORT, () => {
   console.log(

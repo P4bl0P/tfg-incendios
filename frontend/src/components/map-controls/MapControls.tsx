@@ -15,6 +15,8 @@ const MAX_VISIBLE_ACCURACY = 1000;
 interface MapControlsProps {
   weatherEnabled: boolean;
   setWeatherEnabled: (enabled: boolean) => void;
+  evacuationEnabled: boolean;
+  setEvacuationEnabled: (enabled: boolean) => void;
 }
 
 const userLocationIcon = L.divIcon({
@@ -139,6 +141,27 @@ function WindIcon() {
   );
 }
 
+function EvacuationIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="h-[18px] w-[18px]"
+    >
+      <path d="M4 19h16" />
+      <path d="M6 19V7l6-3 6 3v12" />
+      <path d="M9 19v-5h6v5" />
+      <path d="M12 9v3" />
+      <path d="m10.5 10.5 1.5 1.5 1.5-1.5" />
+    </svg>
+  );
+}
+
 function LoadingIcon() {
   return (
     <span
@@ -154,6 +177,8 @@ function LoadingIcon() {
 export default function MapControls({
   weatherEnabled,
   setWeatherEnabled,
+  evacuationEnabled,
+  setEvacuationEnabled,
 }: MapControlsProps) {
   const map = useMap();
 
@@ -316,6 +341,56 @@ export default function MapControls({
               : 'Mostrar meteorología'}
           </span>
         </div>
+
+        <div className="group relative pointer-events-auto">
+          <MapControlButton
+            aria-label={
+              evacuationEnabled
+                ? 'Desactivar rutas de evacuación'
+                : 'Activar rutas de evacuación'
+            }
+            title={
+              evacuationEnabled
+                ? 'Desactivar rutas de evacuación'
+                : 'Activar rutas de evacuación'
+            }
+            aria-pressed={evacuationEnabled}
+            active={evacuationEnabled}
+            onClick={() =>
+              setEvacuationEnabled(!evacuationEnabled)
+            }
+          >
+            <EvacuationIcon />
+
+            {evacuationEnabled && (
+              <span
+                aria-hidden="true"
+                className="
+                  absolute right-0.5 top-0.5 z-20
+                  h-2 w-2 rounded-full
+                  border border-white bg-emerald-500
+                "
+              />
+            )}
+          </MapControlButton>
+
+          <span
+            className="
+              pointer-events-none absolute left-[calc(100%+10px)]
+              top-1/2 z-[1000] hidden -translate-y-1/2
+              whitespace-nowrap rounded-xl
+              border border-white/10 bg-slate-950/90
+              px-3 py-2 text-xs font-medium text-white
+              opacity-0 shadow-xl backdrop-blur-xl
+              transition-all duration-200
+              group-hover:block group-hover:opacity-100
+            "
+          >
+            {evacuationEnabled
+              ? 'Ocultar rutas de evacuación'
+              : 'Mostrar rutas de evacuación'}
+          </span>
+        </div>
       </div>
 
       {errorMessage && (
@@ -323,8 +398,10 @@ export default function MapControls({
           role="alert"
           aria-live="assertive"
           className="
-            absolute left-4 top-28 z-[1000]
-            max-w-[290px]
+            pointer-events-none absolute
+            top-5 left-1/2 z-[1000]
+            w-[min(340px,calc(100%-2rem))]
+            -translate-x-1/2
             rounded-2xl border border-red-300/30
             bg-slate-950/90 px-4 py-3
             text-xs leading-relaxed text-red-100
