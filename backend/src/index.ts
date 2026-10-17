@@ -172,7 +172,12 @@ app.get(
 
 app.get(
   '/api/evacuacion',
-  async (_req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
+    const municipio =
+      typeof req.query.municipio === 'string'
+        ? req.query.municipio
+        : null;
+
     try {
       const query = `
         SELECT json_build_object(
@@ -187,10 +192,24 @@ app.get(
                   'properties', json_build_object(
                     'id', id,
                     'nombre', nombre,
-                    'color', color
+                    'color', color,
+                    'municipio', municipio,
+                    'provincia', provincia,
+                    'tipoEmergencia', tipo_emergencia,
+                    'estado', estado,
+                    'fuente', fuente,
+                    'organismo', organismo,
+                    'fiabilidad', fiabilidad,
+                    'fechaVerificacion', fecha_verificacion,
+                    'urlFuente', url_fuente,
+                    'observaciones', observaciones
                   )
                 ) AS route
                 FROM rutas_evacuacion
+                WHERE (
+                  $1::text IS NULL
+                  OR municipio = $1
+                )
               ) AS routes
             ),
             '[]'::json
@@ -206,10 +225,23 @@ app.get(
                   'properties', json_build_object(
                     'id', id,
                     'nombre', nombre,
-                    'capacidad', capacidad
+                    'capacidad', capacidad,
+                    'tipoPunto', tipo_punto,
+                    'municipio', municipio,
+                    'provincia', provincia,
+                    'fuente', fuente,
+                    'organismo', organismo,
+                    'fiabilidad', fiabilidad,
+                    'fechaVerificacion', fecha_verificacion,
+                    'urlFuente', url_fuente,
+                    'observaciones', observaciones
                   )
                 ) AS point
                 FROM puntos_encuentro
+                WHERE (
+                  $1::text IS NULL
+                  OR municipio = $1
+                )
               ) AS meeting_points
             ),
             '[]'::json
@@ -217,18 +249,20 @@ app.get(
         ) AS evacuation;
       `;
 
-      const { rows } = await pool.query(query);
+      const { rows } = await pool.query(query, [
+        municipio,
+      ]);
 
       res.json(rows[0].evacuation);
     } catch (error) {
       console.error(
-        'Error consultando las rutas de evacuación:',
+        'Error consultando la información de evacuación:',
         error,
       );
 
       res.status(500).json({
         error:
-          'No se han podido cargar las rutas de evacuación.',
+          'No se ha podido cargar la información de evacuación.',
       });
     }
   },

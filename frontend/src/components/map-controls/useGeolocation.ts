@@ -1,4 +1,9 @@
-import { useCallback, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useMap } from 'react-leaflet';
 
 export type UserPosition = [number, number];
@@ -9,12 +14,14 @@ export type LocationStatus =
   | 'success'
   | 'error';
 
+const ERROR_VISIBLE_TIME = 5000;
+
 function getLocationErrorMessage(
   error: GeolocationPositionError,
 ): string {
   switch (error.code) {
     case error.PERMISSION_DENIED:
-      return 'Has bloqueado el permiso de ubicación. Puedes activarlo desde la configuración del navegador.';
+      return 'Has rechazado el permiso de ubicación.';
 
     case error.POSITION_UNAVAILABLE:
       return 'No se ha podido obtener tu ubicación actual.';
@@ -45,20 +52,62 @@ export default function useGeolocation() {
   const [isCentering, setIsCentering] =
     useState(false);
 
-  const locateUser = useCallback(() => {
-    if (!navigator.geolocation) {
+  const errorTimeoutRef =
+    useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearErrorTimeout = useCallback(() => {
+    if (errorTimeoutRef.current !== null) {
+      clearTimeout(errorTimeoutRef.current);
+      errorTimeoutRef.current = null;
+    }
+  }, []);
+
+  const clearLocationError = useCallback(() => {
+    clearErrorTimeout();
+    setErrorMessage(null);
+    setStatus('idle');
+  }, [clearErrorTimeout]);
+
+  const showTemporaryError = useCallback(
+    (message: string) => {
+      clearErrorTimeout();
+
       setStatus('error');
-      setErrorMessage(
+      setIsCentering(false);
+      setErrorMessage(message);
+
+      errorTimeoutRef.current = setTimeout(() => {
+        setErrorMessage(null);
+        setStatus('idle');
+        errorTimeoutRef.current = null;
+      }, ERROR_VISIBLE_TIME);
+    },
+    [clearErrorTimeout],
+  );
+
+  useEffect(() => {
+    return () => {
+      clearErrorTimeout();
+    };
+  }, [clearErrorTimeout]);
+
+  const locateUser = useCallback(() => {
+    clearLocationError();
+
+    if (!navigator.geolocation) {
+      showTemporaryError(
         'Tu navegador no admite geolocalización.',
       );
       return;
     }
 
     setStatus('loading');
-    setErrorMessage(null);
+    setIsCentering(false);
 
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
+        clearErrorTimeout();
+
         const nextPosition: UserPosition = [
           coords.latitude,
           coords.longitude,
@@ -68,6 +117,7 @@ export default function useGeolocation() {
         setAccuracy(coords.accuracy);
         setStatus('success');
         setIsCentering(true);
+        setErrorMessage(null);
 
         const handleMoveEnd = () => {
           setIsCentering(false);
@@ -86,9 +136,7 @@ export default function useGeolocation() {
         );
       },
       (error) => {
-        setStatus('error');
-        setIsCentering(false);
-        setErrorMessage(
+        showTemporaryError(
           getLocationErrorMessage(error),
         );
       },
@@ -98,7 +146,12 @@ export default function useGeolocation() {
         maximumAge: 30000,
       },
     );
-  }, [map]);
+  }, [
+    clearErrorTimeout,
+    clearLocationError,
+    map,
+    showTemporaryError,
+  ]);
 
   return {
     position,

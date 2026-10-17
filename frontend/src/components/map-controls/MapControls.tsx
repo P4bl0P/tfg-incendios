@@ -398,8 +398,10 @@ export default function MapControls({
           role="alert"
           aria-live="assertive"
           className="
-            absolute left-4 top-28 z-[1000]
-            max-w-[290px]
+            pointer-events-none absolute
+            top-5 left-1/2 z-[1000]
+            w-[min(340px,calc(100%-2rem))]
+            -translate-x-1/2
             rounded-2xl border border-red-300/30
             bg-slate-950/90 px-4 py-3
             text-xs leading-relaxed text-red-100

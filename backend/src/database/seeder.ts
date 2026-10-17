@@ -12,12 +12,58 @@ interface FireSeed {
 interface EvacuationRouteSeed {
   nombre: string;
   color: string;
+  municipio: string;
+  provincia: string;
+  tipoEmergencia: string;
+  estado: 'vigente' | 'temporal' | 'pendiente_validacion' | 'informativa';
+  fuente:
+    | 'plan_municipal'
+    | 'plan_autoproteccion'
+    | 'junta_andalucia'
+    | 'dera'
+    | 'openstreetmap'
+    | 'calculada';
+  organismo: string | null;
+  fiabilidad:
+    | 'muy_alta'
+    | 'alta'
+    | 'media'
+    | 'baja'
+    | 'informativa';
+  fechaVerificacion: string | null;
+  urlFuente: string | null;
+  observaciones: string | null;
   coordinates: Array<[number, number]>;
 }
 
 interface MeetingPointSeed {
   nombre: string;
   capacidad: number | null;
+  tipoPunto:
+    | 'evacuacion_ciudadana'
+    | 'autoproteccion'
+    | 'recurso_infoca'
+    | 'assembly_point_osm'
+    | 'informativo';
+  municipio: string;
+  provincia: string;
+  fuente:
+    | 'plan_municipal'
+    | 'plan_autoproteccion'
+    | 'junta_andalucia'
+    | 'dera'
+    | 'openstreetmap'
+    | 'calculada';
+  organismo: string | null;
+  fiabilidad:
+    | 'muy_alta'
+    | 'alta'
+    | 'media'
+    | 'baja'
+    | 'informativa';
+  fechaVerificacion: string | null;
+  urlFuente: string | null;
+  observaciones: string | null;
   longitude: number;
   latitude: number;
 }
@@ -217,57 +263,26 @@ const fires: FireSeed[] = [
   },
 ];
 
-const evacuationRoutes: EvacuationRouteSeed[] = [
-  {
-    nombre: 'Ruta de evacuación norte',
-    color: '#16a34a',
-    coordinates: [
-      [-4.42, 39.02],
-      [-4.36, 39.08],
-      [-4.28, 39.14],
-      [-4.18, 39.20],
-    ],
-  },
-  {
-    nombre: 'Ruta de evacuación oeste',
-    color: '#2563eb',
-    coordinates: [
-      [-4.75, 38.98],
-      [-4.67, 39.04],
-      [-4.58, 39.10],
-      [-4.48, 39.16],
-    ],
-  },
-  {
-    nombre: 'Ruta de evacuación sur',
-    color: '#f59e0b',
-    coordinates: [
-      [-4.44, 38.92],
-      [-4.38, 38.86],
-      [-4.31, 38.80],
-      [-4.24, 38.75],
-    ],
-  },
-];
+const evacuationRoutes: EvacuationRouteSeed[] = [];
 
 const meetingPoints: MeetingPointSeed[] = [
   {
-    nombre: 'Punto de encuentro municipal',
-    capacidad: 250,
-    longitude: -4.18,
-    latitude: 39.20,
-  },
-  {
-    nombre: 'Pabellón deportivo',
-    capacidad: 500,
-    longitude: -4.48,
-    latitude: 39.16,
-  },
-  {
-    nombre: 'Área recreativa segura',
+    nombre: 'Centro de visitantes La Rocina',
     capacidad: null,
-    longitude: -4.24,
-    latitude: 38.75,
+    tipoPunto: 'autoproteccion',
+    municipio: 'Almonte',
+    provincia: 'Huelva',
+    fuente: 'plan_autoproteccion',
+    organismo:
+      'Junta de Andalucía · Espacio Natural de Doñana',
+    fiabilidad: 'media',
+    fechaVerificacion: '2026-10-17',
+    urlFuente:
+      'https://www.juntadeandalucia.es/medioambiente/portal/web/ventanadelvisitante/detalle-buscador-mapa/-/asset_publisher/Jlbxh2qB3NwR/content/la-rocina',
+    observaciones:
+      'Equipamiento con información oficial y plan de autoprotección frente a incendios forestales. La coordenada utilizada es provisional y debe verificarse con la descarga cartográfica oficial antes de considerar este punto como ubicación definitiva. No debe mostrarse como punto de evacuación ciudadana sin confirmación municipal.',
+    longitude: -6.4935,
+    latitude: 37.1308,
   },
 ];
 
@@ -328,13 +343,33 @@ async function runSeeder() {
           INSERT INTO rutas_evacuacion (
             nombre,
             color,
+            municipio,
+            provincia,
+            tipo_emergencia,
+            estado,
+            fuente,
+            organismo,
+            fiabilidad,
+            fecha_verificacion,
+            url_fuente,
+            observaciones,
             geom
           )
           VALUES (
             $1,
             $2,
+            $3,
+            $4,
+            $5,
+            $6,
+            $7,
+            $8,
+            $9,
+            $10,
+            $11,
+            $12,
             ST_SetSRID(
-              ST_GeomFromGeoJSON($3),
+              ST_GeomFromGeoJSON($13),
               4326
             )
           )
@@ -342,6 +377,16 @@ async function runSeeder() {
         [
           route.nombre,
           route.color,
+          route.municipio,
+          route.provincia,
+          route.tipoEmergencia,
+          route.estado,
+          route.fuente,
+          route.organismo,
+          route.fiabilidad,
+          route.fechaVerificacion,
+          route.urlFuente,
+          route.observaciones,
           JSON.stringify({
             type: 'LineString',
             coordinates: route.coordinates,
@@ -356,13 +401,31 @@ async function runSeeder() {
           INSERT INTO puntos_encuentro (
             nombre,
             capacidad,
+            tipo_punto,
+            municipio,
+            provincia,
+            fuente,
+            organismo,
+            fiabilidad,
+            fecha_verificacion,
+            url_fuente,
+            observaciones,
             geom
           )
           VALUES (
             $1,
             $2,
+            $3,
+            $4,
+            $5,
+            $6,
+            $7,
+            $8,
+            $9,
+            $10,
+            $11,
             ST_SetSRID(
-              ST_MakePoint($3, $4),
+              ST_MakePoint($12, $13),
               4326
             )
           )
@@ -370,6 +433,15 @@ async function runSeeder() {
         [
           point.nombre,
           point.capacidad,
+          point.tipoPunto,
+          point.municipio,
+          point.provincia,
+          point.fuente,
+          point.organismo,
+          point.fiabilidad,
+          point.fechaVerificacion,
+          point.urlFuente,
+          point.observaciones,
           point.longitude,
           point.latitude,
         ],
