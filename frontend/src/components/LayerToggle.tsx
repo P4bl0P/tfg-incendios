@@ -40,6 +40,45 @@ function MapLayerIcon({
     );
   }
 
+  if (layer === 'dark') {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+        className="h-4 w-4"
+      >
+        <path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5a8.5 8.5 0 1 0 12 12Z" />
+        <path d="M17 4v3" />
+        <path d="M15.5 5.5h3" />
+      </svg>
+    );
+  }
+
+  if (layer === 'outdoor') {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+        className="h-4 w-4"
+      >
+        <path d="m3 19 6-9 4 5 3-3 5 7" />
+        <path d="M3 19h18" />
+        <path d="m14 7 2-3 5 6" />
+        <path d="M7 7h.01" />
+      </svg>
+    );
+  }
+
   if (layer === 'topographic') {
     return (
       <svg
@@ -55,25 +94,9 @@ function MapLayerIcon({
         <path d="m3 19 6-8 4 5 3-4 5 7" />
         <path d="M3 19h18" />
         <path d="m14 7 2-3 5 6" />
-      </svg>
-    );
-  }
-
-  if (layer === 'relief') {
-    return (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        className="h-4 w-4"
-      >
-        <path d="m3 18 6-8 4 4 3-5 5 9" />
-        <path d="M3 18h18" />
-        <path d="M8 10h.01" />
+        <path d="M7 14h.01" />
+        <path d="M11 10h.01" />
+        <path d="M16 15h.01" />
       </svg>
     );
   }
@@ -140,11 +163,11 @@ export default function LayerToggle({
     const handlePointerDown = (
       event: PointerEvent,
     ) => {
+      const target = event.target as Node;
+
       if (
         containerRef.current &&
-        !containerRef.current.contains(
-          event.target as Node,
-        )
+        !containerRef.current.contains(target)
       ) {
         setIsOpen(false);
       }
@@ -191,7 +214,7 @@ export default function LayerToggle({
   return (
     <div
       ref={containerRef}
-      className="absolute right-4 top-4 z-[1000]"
+      className="pointer-events-auto absolute right-4 top-4 z-[1000]"
     >
       <button
         type="button"
@@ -200,7 +223,7 @@ export default function LayerToggle({
         aria-label={`Mapa actual: ${activeLayerData.label}`}
         onClick={() => setIsOpen((value) => !value)}
         className={[
-          'group flex h-9 min-w-[132px] items-center',
+          'group flex h-9 min-w-[148px] items-center',
           'justify-between gap-2 rounded-xl',
           'border border-white/80',
           'bg-white/95 px-3',
@@ -232,7 +255,7 @@ export default function LayerToggle({
         aria-label="Tipos de mapa disponibles"
         className={[
           'absolute right-0 top-[calc(100%+8px)]',
-          'w-64 origin-top-right',
+          'w-72 origin-top-right',
           'rounded-2xl border border-white/70',
           'bg-white/95 p-1.5',
           'shadow-[0_12px_30px_rgba(15,23,42,0.22)]',
@@ -260,7 +283,11 @@ export default function LayerToggle({
                 'hover:-translate-y-0.5',
                 isActive
                   ? 'bg-blue-50 text-blue-600'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-blue-600',
+                  : [
+                      'text-slate-600',
+                      'hover:bg-slate-50',
+                      'hover:text-blue-600',
+                    ].join(' '),
               ].join(' ')}
             >
               <span
