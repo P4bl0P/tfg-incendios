@@ -170,6 +170,70 @@ app.get(
   },
 );
 
+app.get(
+  '/api/evacuacion',
+  async (_req: Request, res: Response) => {
+    try {
+      const query = `
+        SELECT json_build_object(
+          'routes',
+          COALESCE(
+            (
+              SELECT json_agg(route)
+              FROM (
+                SELECT json_build_object(
+                  'type', 'Feature',
+                  'geometry', ST_AsGeoJSON(geom)::json,
+                  'properties', json_build_object(
+                    'id', id,
+                    'nombre', nombre,
+                    'color', color
+                  )
+                ) AS route
+                FROM rutas_evacuacion
+              ) AS routes
+            ),
+            '[]'::json
+          ),
+          'meetingPoints',
+          COALESCE(
+            (
+              SELECT json_agg(point)
+              FROM (
+                SELECT json_build_object(
+                  'type', 'Feature',
+                  'geometry', ST_AsGeoJSON(geom)::json,
+                  'properties', json_build_object(
+                    'id', id,
+                    'nombre', nombre,
+                    'capacidad', capacidad
+                  )
+                ) AS point
+                FROM puntos_encuentro
+              ) AS meeting_points
+            ),
+            '[]'::json
+          )
+        ) AS evacuation;
+      `;
+
+      const { rows } = await pool.query(query);
+
+      res.json(rows[0].evacuation);
+    } catch (error) {
+      console.error(
+        'Error consultando las rutas de evacuación:',
+        error,
+      );
+
+      res.status(500).json({
+        error:
+          'No se han podido cargar las rutas de evacuación.',
+      });
+    }
+  },
+);
+
 
 app.listen(PORT, () => {
   console.log(

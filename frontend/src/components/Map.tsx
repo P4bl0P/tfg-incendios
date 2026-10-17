@@ -11,6 +11,8 @@ import FireDetailsSidebar from './fires/FireDetailsSidebar';
 import useFires from './fires/useFires';
 import useReverseGeocoding from './fires/useReverseGeocoding';
 import WindGridLayer from './weather/WindGridLayer';
+import EvacuationLayer from './evacuation/EvacuationLayer';
+import useEvacuation from './evacuation/useEvacuation';
 
 import type { FireFeature } from './fires/fireTypes';
 
@@ -25,6 +27,9 @@ export default function Map() {
   const [weatherEnabled, setWeatherEnabled] =
     useState(false);
 
+  const [evacuationEnabled, setEvacuationEnabled] =
+    useState(false);
+
   const [selectedFire, setSelectedFire] =
     useState<FireFeature | null>(null);
 
@@ -34,7 +39,19 @@ export default function Map() {
     error: firesError,
   } = useFires();
 
+  const {
+    evacuation,
+    loading: evacuationLoading,
+    error: evacuationError,
+  } = useEvacuation();
+
   const features = incendios?.features ?? [];
+
+  const evacuationRoutes =
+    evacuation?.routes ?? [];
+
+  const meetingPoints =
+    evacuation?.meetingPoints ?? [];
 
   const selectedCoordinates =
     selectedFire?.geometry.coordinates ?? null;
@@ -90,11 +107,21 @@ export default function Map() {
       >
         <BaseMapLayer layerType={layerType} />
 
+        <EvacuationLayer
+          enabled={evacuationEnabled}
+          routes={evacuationRoutes}
+          meetingPoints={meetingPoints}
+          loading={evacuationLoading}
+          error={evacuationError}
+        />
+
         <WindGridLayer enabled={weatherEnabled} />
 
         <MapControls
           weatherEnabled={weatherEnabled}
           setWeatherEnabled={setWeatherEnabled}
+          evacuationEnabled={evacuationEnabled}
+          setEvacuationEnabled={setEvacuationEnabled}
         />
 
         <FireLayer
@@ -114,7 +141,6 @@ export default function Map() {
           onClose={() => setSelectedFire(null)}
         />
       )}
-      
     </div>
   );
 }

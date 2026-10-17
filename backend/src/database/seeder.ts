@@ -9,6 +9,19 @@ interface FireSeed {
   detectedAt: string;
 }
 
+interface EvacuationRouteSeed {
+  nombre: string;
+  color: string;
+  coordinates: Array<[number, number]>;
+}
+
+interface MeetingPointSeed {
+  nombre: string;
+  capacidad: number | null;
+  longitude: number;
+  latitude: number;
+}
+
 const fires: FireSeed[] = [
   {
     estado: 'Activo',
@@ -204,6 +217,60 @@ const fires: FireSeed[] = [
   },
 ];
 
+const evacuationRoutes: EvacuationRouteSeed[] = [
+  {
+    nombre: 'Ruta de evacuación norte',
+    color: '#16a34a',
+    coordinates: [
+      [-4.42, 39.02],
+      [-4.36, 39.08],
+      [-4.28, 39.14],
+      [-4.18, 39.20],
+    ],
+  },
+  {
+    nombre: 'Ruta de evacuación oeste',
+    color: '#2563eb',
+    coordinates: [
+      [-4.75, 38.98],
+      [-4.67, 39.04],
+      [-4.58, 39.10],
+      [-4.48, 39.16],
+    ],
+  },
+  {
+    nombre: 'Ruta de evacuación sur',
+    color: '#f59e0b',
+    coordinates: [
+      [-4.44, 38.92],
+      [-4.38, 38.86],
+      [-4.31, 38.80],
+      [-4.24, 38.75],
+    ],
+  },
+];
+
+const meetingPoints: MeetingPointSeed[] = [
+  {
+    nombre: 'Punto de encuentro municipal',
+    capacidad: 250,
+    longitude: -4.18,
+    latitude: 39.20,
+  },
+  {
+    nombre: 'Pabellón deportivo',
+    capacidad: 500,
+    longitude: -4.48,
+    latitude: 39.16,
+  },
+  {
+    nombre: 'Área recreativa segura',
+    capacidad: null,
+    longitude: -4.24,
+    latitude: 38.75,
+  },
+];
+
 async function runSeeder() {
   const client = await pool.connect();
 
@@ -246,10 +313,75 @@ async function runSeeder() {
       );
     }
 
+    await client.query(
+      `
+        TRUNCATE TABLE
+          rutas_evacuacion,
+          puntos_encuentro
+        RESTART IDENTITY
+      `,
+    );
+
+    for (const route of evacuationRoutes) {
+      await client.query(
+        `
+          INSERT INTO rutas_evacuacion (
+            nombre,
+            color,
+            geom
+          )
+          VALUES (
+            $1,
+            $2,
+            ST_SetSRID(
+              ST_GeomFromGeoJSON($3),
+              4326
+            )
+          )
+        `,
+        [
+          route.nombre,
+          route.color,
+          JSON.stringify({
+            type: 'LineString',
+            coordinates: route.coordinates,
+          }),
+        ],
+      );
+    }
+
+    for (const point of meetingPoints) {
+      await client.query(
+        `
+          INSERT INTO puntos_encuentro (
+            nombre,
+            capacidad,
+            geom
+          )
+          VALUES (
+            $1,
+            $2,
+            ST_SetSRID(
+              ST_MakePoint($3, $4),
+              4326
+            )
+          )
+        `,
+        [
+          point.nombre,
+          point.capacidad,
+          point.longitude,
+          point.latitude,
+        ],
+      );
+    }
+
     await client.query('COMMIT');
 
     console.log(
-      `✅ Se han insertado ${fires.length} focos de prueba.`,
+      `✅ Se han insertado ${fires.length} focos, ` +
+      `${evacuationRoutes.length} rutas y ` +
+      `${meetingPoints.length} puntos de encuentro.`,
     );
   } catch (error) {
     await client.query('ROLLBACK');
